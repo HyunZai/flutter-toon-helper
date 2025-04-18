@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:toonhelper/models/webtoon_detail_model.dart';
+import 'package:toonhelper/models/webtoon_episode_model.dart';
+import 'package:toonhelper/services/api_service.dart';
 
-class DetailScreen extends StatelessWidget {
+class DetailScreen extends StatefulWidget {
   final String title, thumb, id;
 
   const DetailScreen({
@@ -9,6 +12,21 @@ class DetailScreen extends StatelessWidget {
     required this.thumb,
     required this.id,
   });
+
+  @override
+  State<DetailScreen> createState() => _DetailScreenState();
+}
+
+class _DetailScreenState extends State<DetailScreen> {
+  late Future<WebtoonDetailModel> webtoon;
+  late Future<List<WebtoonEpisodeModel>> episodes;
+
+  @override
+  void initState() {
+    super.initState();
+    webtoon = ApiService.getToonById(widget.id);
+    episodes = ApiService.getLatestEpisodesById(widget.id);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -20,7 +38,7 @@ class DetailScreen extends StatelessWidget {
         shadowColor: Colors.black,
         foregroundColor: Colors.green,
         title: Text(
-          title,
+          widget.title,
           style: TextStyle(fontSize: 24, fontWeight: FontWeight.w600),
         ),
       ),
@@ -30,24 +48,27 @@ class DetailScreen extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Container(
-                width: 250,
-                clipBehavior: Clip.hardEdge,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(15),
-                  boxShadow: [
-                    BoxShadow(
-                      blurRadius: 15,
-                      offset: Offset(10, 10),
-                      color: Colors.black.withAlpha(125),
-                    ),
-                  ],
-                ),
-                child: Image.network(
-                  thumb,
-                  headers: const {
-                    'Referer': 'https://comic.naver.com',
-                  }, // 403에러가 발생해서 headers 추가
+              Hero(
+                tag: widget.id,
+                child: Container(
+                  width: 250,
+                  clipBehavior: Clip.hardEdge,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(15),
+                    boxShadow: [
+                      BoxShadow(
+                        blurRadius: 15,
+                        offset: Offset(10, 10),
+                        color: Colors.black.withAlpha(125),
+                      ),
+                    ],
+                  ),
+                  child: Image.network(
+                    widget.thumb,
+                    headers: const {
+                      'Referer': 'https://comic.naver.com',
+                    }, // 403에러가 발생해서 headers 추가
+                  ),
                 ),
               ),
             ],
